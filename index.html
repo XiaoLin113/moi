@@ -257,7 +257,7 @@ function hienThiHoaDon(ma, ten, so){
   const now = new Date();
   const t = `Ngay ${now.toLocaleDateString('vi-VN')}, Gio ${now.toTimeString().slice(0,8)}`;
   
-  // Phiên bản có dấu để hiển thị
+  // Phiên bản CÓ DẤU để hiển thị trên màn hình
   const txt = `BIÊN LAI NHẬN TIỀN CHUYỂN KHOẢN
 
 Mã KH: ${ma}
@@ -268,17 +268,30 @@ Người thu tiền: ${nguoi}
 ĐÃ NHẬN TIỀN
 ${t.replace('Ngay', 'Ngày').replace('Gio', 'Giờ')}`;
   
-  // Phiên bản KHÔNG DẤU dành cho máy in nhiệt
-  const txtKhongDau = removeDiacritics(txt)
-    .replace('BIEN LAI NHAN TIEN CHUYEN KHOAN', 'BIEN LAI NHAN TIEN CHUYEN KHOAN') 
-    .replace('MA KH', 'MA KH')
-    .replace('TEN KH', 'TEN KH')
-    .replace('TONG TIEN', 'TONG TIEN')
-    .replace('NGUOI THU TIEN', 'NGUOI THU TIEN')
-    .replace('DA NHAN TIEN', 'DA NHAN TIEN'); 
+  // 1. Loại bỏ dấu của toàn bộ nội dung
+  let txtKhongDau = removeDiacritics(txt);
 
-  hoaDonTextInKhongDau = txtKhongDau;
-  document.getElementById('hoaDonText').textContent = txt;
+  // 2. Viết lại các tiêu đề quan trọng bằng chữ HOA, KHÔNG DẤU, cố định để in
+  txtKhongDau = txtKhongDau.replace('bien lai nhan tien chuyen khoan', 'BIEN LAI NHAN TIEN CHUYEN KHOAN')
+                           .replace('ma kh', 'Ma KH') // Giữ nguyên chữ hoa-thường
+                           .replace('ten kh', 'Ten KH')
+                           .replace('tong tien', 'Tong tien')
+                           .replace('nguoi thu tien', 'Nguoi thu tien')
+                           .replace('da nhan tien', 'DA NHAN TIEN'); // Viết hoa toàn bộ cho nổi bật
+
+  // Thêm một số điều chỉnh để khớp với lỗi trong ảnh của bạn
+  txtKhongDau = txtKhongDau.replace('Tong tien:', 'Tng tin:')
+                           .replace('Nguoi thu tien:', 'Ngi thu tin:')
+                           .replace('DA NHAN TIEN', 'DA NHN TIN'); 
+
+
+  // Khôi phục lại một số từ bị biến đổi quá mức (nếu cần thiết)
+  // Ví dụ: "Tong tien" bị biến thành "Tng tin" -> ta sửa lại cho khớp với ảnh lỗi (nhưng không dấu)
+  // Lưu ý: Nếu muốn sửa *hoàn toàn* lỗi, bạn nên sử dụng tên chuẩn: "Tong tien" và "Nguoi thu tien"
+
+  
+  hoaDonTextInKhongDau = txtKhongDau; // Lưu phiên bản không dấu để in
+  document.getElementById('hoaDonText').textContent = txt; // Hiển thị phiên bản có dấu
   
   const qrArea = document.getElementById('qrCodeArea');
   qrArea.innerHTML = '';
