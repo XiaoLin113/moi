@@ -190,6 +190,29 @@ let duLieu=[],lichSuIn=JSON.parse(localStorage.getItem('lichSuIn')||'[]'),lichSu
 const phiCoDinh=2000;
 function formatVND(n){return Number(n).toLocaleString('vi-VN')+' ₫';}
 
+// Chức năng mới để loại bỏ dấu tiếng Việt (giúp in trên máy in nhiệt không lỗi font)
+function removeDiacritics(str) {
+  str = str.toLowerCase();
+  str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+  str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+  str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+  str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+  str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+  str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+  str = str.replace(/đ/g, "d");
+  str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+  str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+  str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+  str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+  str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+  str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+  str = str.replace(/Đ/g, "D");
+  return str;
+}
+// Biến để lưu trữ nội dung hóa đơn không dấu cho máy in nhiệt
+let hoaDonTextInKhongDau = '';
+
+
 function docFileExcel(event) {
   const file = event.target.files[0];
   const reader = new FileReader();
@@ -198,7 +221,7 @@ function docFileExcel(event) {
     const workbook = XLSX.read(data, { type: "array" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     duLieu = XLSX.utils.sheet_to_json(sheet).map(row => ({
-      MA_KHTT: String(row.MA_KHTT || row.MA || "").trim().toUpperCase().replace(/(\.0)$/,""),
+      MA_KHTT: String(row.MA_KHTT || row.MA || "").trim().toUpperCase().replace(/(\\.0)$/,""),
       TEN_KHTT: String(row.TEN_KHTT || row.TEN || "").trim(),
       TONG_NOP: String(row.TONG_NOP || row.TIEN || "").replace(/[^0-9]/g, "")
     }));
@@ -217,7 +240,12 @@ function docFileExcel(event) {
 function timKiemMaKH(){
   const ma=document.getElementById('maKH').value.trim();
   const kh=duLieu.find(r=>r.MA_KHTT===ma);
-  if(!kh){document.getElementById('hoaDonText').textContent='[Không tìm thấy khách hàng]';return;}
+  if(!kh){
+    document.getElementById('tenKH').value = '';
+    document.getElementById('soTien').value = '';
+    document.getElementById('hoaDonText').textContent='[Không tìm thấy khách hàng]';
+    return;
+  }
   document.getElementById('tenKH').value=kh.TEN_KHTT;
   document.getElementById('soTien').value=kh.TONG_NOP;
   hienThiHoaDon(ma, kh.TEN_KHTT, kh.TONG_NOP);
@@ -228,17 +256,30 @@ function hienThiHoaDon(ma, ten, so){
   const tong = Number(so) + phiCoDinh;
   const now = new Date();
   const t = `Ngay ${now.toLocaleDateString('vi-VN')}, Gio ${now.toTimeString().slice(0,8)}`;
-  const txt = `BIEN LAI NHAN TIEN CHUYEN KHOAN
+  
+  // Phiên bản có dấu để hiển thị
+  const txt = `BIÊN LAI NHẬN TIỀN CHUYỂN KHOẢN
 
-Ma KH: ${ma}
-Ten KH: ${ten}
-Tong tien: ${formatVND(tong)}
-Nguoi thu tien: ${nguoi}
+Mã KH: ${ma}
+Tên KH: ${ten}
+Tổng tiền: ${formatVND(tong)}
+Người thu tiền: ${nguoi}
 
-DA NHAN TIEN
-${t}`;
+ĐÃ NHẬN TIỀN
+${t.replace('Ngay', 'Ngày').replace('Gio', 'Giờ')}`;
+  
+  // Phiên bản KHÔNG DẤU dành cho máy in nhiệt
+  const txtKhongDau = removeDiacritics(txt)
+    .replace('BIEN LAI NHAN TIEN CHUYEN KHOAN', 'BIEN LAI NHAN TIEN CHUYEN KHOAN') 
+    .replace('MA KH', 'MA KH')
+    .replace('TEN KH', 'TEN KH')
+    .replace('TONG TIEN', 'TONG TIEN')
+    .replace('NGUOI THU TIEN', 'NGUOI THU TIEN')
+    .replace('DA NHAN TIEN', 'DA NHAN TIEN'); 
 
+  hoaDonTextInKhongDau = txtKhongDau;
   document.getElementById('hoaDonText').textContent = txt;
+  
   const qrArea = document.getElementById('qrCodeArea');
   qrArea.innerHTML = '';
   new QRCode(qrArea, { text: ma, width: 128, height: 128, correctLevel: QRCode.CorrectLevel.H });
@@ -249,34 +290,46 @@ function capNhatLichSu(){
   document.getElementById('lichSuThu').value=lichSuThu.map(i=>`(${i.thoiGian}) ${i.maKH}-${i.tenKH}: ${formatVND(i.soTien)}`).join('\n');
 }
 
-<script>
-function removeDiacritics(str) {
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
 function inHoaDon(){
-  const hoaDon = document.getElementById('hoaDon');
-  const oldContent = hoaDon.innerHTML;
+  const hoaDonTextElement = document.getElementById('hoaDonText');
+  const originalText = hoaDonTextElement.textContent;
+  const ma=document.getElementById('maKH').value,ten=document.getElementById('tenKH').value,so=Number(document.getElementById('soTien').value||0)+phiCoDinh;
 
-  // Chuyển tạm sang không dấu
-  hoaDon.innerHTML = removeDiacritics(oldContent);
+  if (!ma || so <= phiCoDinh) {
+      alert("Vui lòng tìm kiếm khách hàng trước khi In.");
+      return;
+  }
 
-  // In với CSS gốc
+  // Tạm thời thay thế bằng nội dung KHÔNG DẤU trước khi in
+  hoaDonTextElement.textContent = hoaDonTextInKhongDau || originalText;
+  
   window.print();
+  
+  // Phục hồi nội dung CÓ DẤU sau khi in
+  setTimeout(() => {
+    hoaDonTextElement.textContent = originalText;
+  }, 100); 
 
-  // Khôi phục lại nội dung gốc (có dấu)
-  hoaDon.innerHTML = oldContent;
+  // Thêm vào lịch sử in
+  lichSuIn.push({maKH:ma,tenKH:ten,soTien:so,thoiGian:new Date().toLocaleString()});
+  localStorage.setItem('lichSuIn',JSON.stringify(lichSuIn));
+  capNhatLichSu();
 }
-</script>
 
 function xacNhanThu(){
   const ma=document.getElementById('maKH').value,ten=document.getElementById('tenKH').value,so=Number(document.getElementById('soTien').value||0)+phiCoDinh;
-  lichSuThu.push({maKH:ma,tenKH:ten,soTien:so,thoiGian:new Date().toLocaleString()});
-  localStorage.setItem('lichSuThu',JSON.stringify(lichSuThu));capNhatLichSu();
+  if (ma && so > phiCoDinh) { 
+    lichSuThu.push({maKH:ma,tenKH:ten,soTien:so,thoiGian:new Date().toLocaleString()});
+    localStorage.setItem('lichSuThu',JSON.stringify(lichSuThu));
+    capNhatLichSu();
+  } else {
+    alert("Vui lòng tìm kiếm khách hàng trước khi xác nhận thu.");
+  }
 }
 
 function xuatLichSu(loai){
   const arr=loai==='in'?lichSuIn:lichSuThu;
+  // Sửa lỗi: thay thế '\n' bằng '\n' để hoạt động đúng trong Blob
   const txt=arr.map(i=>`(${i.thoiGian}) ${i.maKH}-${i.tenKH}: ${i.soTien}`).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download=`lich_su_${loai}.txt`;a.click();
 }
@@ -294,10 +347,22 @@ let html5QrCode;
 function batDauQuetQR(){
   const region=document.getElementById('qr-reader');region.style.display='block';
   if(!html5QrCode)html5QrCode=new Html5Qrcode('qr-reader');
+  
+  // Tắt camera đang chạy nếu có
+  if (html5QrCode.isScanning) {
+      html5QrCode.stop().then(() => {
+          region.style.display='none';
+          batDauQuetQR(); // Khởi động lại
+      }).catch(err => {
+          console.error("Lỗi khi dừng camera cũ:", err);
+      });
+      return;
+  }
+
   html5QrCode.start({facingMode:'environment'},{fps:10,qrbox:250},
     msg=>{document.getElementById('maKH').value=msg;region.style.display='none';html5QrCode.stop();timKiemMaKH();},
     err=>{}
-  ).catch(()=>{alert('Không mở được camera');region.style.display='none';});
+  ).catch(()=>{alert('Không mở được camera, vui lòng thử lại');region.style.display='none';});
 }
 window.onload=capNhatLichSu;
 </script>
