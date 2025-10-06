@@ -198,7 +198,7 @@ function docFileExcel(event) {
     const workbook = XLSX.read(data, { type: "array" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     duLieu = XLSX.utils.sheet_to_json(sheet).map(row => ({
-      MA_KHTT: String(row.MA_KHTT || row.MA || "").trim().toUpperCase().replace(/(\\.0)$/,""),
+      MA_KHTT: String(row.MA_KHTT || row.MA || "").trim().toUpperCase().replace(/(\.0)$/,""),
       TEN_KHTT: String(row.TEN_KHTT || row.TEN || "").trim(),
       TONG_NOP: String(row.TONG_NOP || row.TIEN || "").replace(/[^0-9]/g, "")
     }));
@@ -227,15 +227,15 @@ function hienThiHoaDon(ma, ten, so){
   const nguoi = document.getElementById('nguoiThuTien').value || '-';
   const tong = Number(so) + phiCoDinh;
   const now = new Date();
-  const t = `Ngày ${now.toLocaleDateString('vi-VN')}, Giờ ${now.toTimeString().slice(0,8)}`;
-  const txt = `BIÊN LAI NHẬN TIỀN CHUYỂN KHOẢN
+  const t = `Ngay ${now.toLocaleDateString('vi-VN')}, Gio ${now.toTimeString().slice(0,8)}`;
+  const txt = `BIEN LAI NHAN TIEN CHUYEN KHOAN
 
-Mã KH: ${ma}
-Tên KH: ${ten}
-Tổng tiền: ${formatVND(tong)}
-Người thu tiền: ${nguoi}
+Ma KH: ${ma}
+Ten KH: ${ten}
+Tong tien: ${formatVND(tong)}
+Nguoi thu tien: ${nguoi}
 
-ĐÃ NHẬN TIỀN
+DA NHAN TIEN
 ${t}`;
 
   document.getElementById('hoaDonText').textContent = txt;
@@ -245,15 +245,10 @@ ${t}`;
 }
 
 function capNhatLichSu(){
-  document.getElementById('lichSuIn').value=lichSuIn.map(i=>`(${i.thoiGian}) ${i.maKH}-${i.tenKH}: ${formatVND(i.soTien)}`).join('\\n');
-  document.getElementById('lichSuThu').value=lichSuThu.map(i=>`(${i.thoiGian}) ${i.maKH}-${i.tenKH}: ${formatVND(i.soTien)}`).join('\\n');
+  document.getElementById('lichSuIn').value=lichSuIn.map(i=>`(${i.thoiGian}) ${i.maKH}-${i.tenKH}: ${formatVND(i.soTien)}`).join('\n');
+  document.getElementById('lichSuThu').value=lichSuThu.map(i=>`(${i.thoiGian}) ${i.maKH}-${i.tenKH}: ${formatVND(i.soTien)}`).join('\n');
 }
 
-function removeDiacritics(str) {
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
-<script>
 function removeDiacritics(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
@@ -273,7 +268,6 @@ function inHoaDon(){
   printWindow.print();
   printWindow.close();
 }
-</script>
 
 function xacNhanThu(){
   const ma=document.getElementById('maKH').value,ten=document.getElementById('tenKH').value,so=Number(document.getElementById('soTien').value||0)+phiCoDinh;
@@ -283,7 +277,7 @@ function xacNhanThu(){
 
 function xuatLichSu(loai){
   const arr=loai==='in'?lichSuIn:lichSuThu;
-  const txt=arr.map(i=>`(${i.thoiGian}) ${i.maKH}-${i.tenKH}: ${i.soTien}`).join('\\n');
+  const txt=arr.map(i=>`(${i.thoiGian}) ${i.maKH}-${i.tenKH}: ${i.soTien}`).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download=`lich_su_${loai}.txt`;a.click();
 }
 
