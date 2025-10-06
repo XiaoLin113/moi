@@ -109,28 +109,6 @@
       background: #fafafa;
       overflow: hidden;
     }
-
-    /* CSS in chỉ phần hóa đơn - khổ 58mm */
-    @media print {
-      body * {
-        visibility: hidden !important;
-      }
-      #hoaDon, #hoaDon * {
-        visibility: visible !important;
-      }
-      #hoaDon {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 58mm; /* khổ giấy */
-        font-size: 14px;
-        border: none;
-        margin: 0;
-        padding: 0;
-        box-shadow: none;
-        background: #fff;
-      }
-    }
   </style>
 </head>
 <body>
@@ -249,8 +227,44 @@ function capNhatLichSu(){
   document.getElementById('lichSuThu').value=lichSuThu.map(i=>`(${i.thoiGian}) ${i.maKH}-${i.tenKH}: ${formatVND(i.soTien)}`).join('\\n');
 }
 
-function inHoaDon(){
-  window.print();
+async function inHoaDon(){
+  const hoaDonDiv = document.getElementById("hoaDon");
+
+  // Chụp hóa đơn thành ảnh
+  const canvas = await html2canvas(hoaDonDiv, { scale: 3, useCORS: true });
+  const imgData = canvas.toDataURL("image/png");
+
+  // Lưu lịch sử in
+  const ma=document.getElementById('maKH').value,
+        ten=document.getElementById('tenKH').value,
+        so=Number(document.getElementById('soTien').value||0)+phiCoDinh;
+  lichSuIn.push({maKH:ma,tenKH:ten,soTien:so,thoiGian:new Date().toLocaleString()});
+  localStorage.setItem('lichSuIn',JSON.stringify(lichSuIn));
+  capNhatLichSu();
+
+  // Tạo trang in chỉ chứa ảnh
+  const win = window.open("", "_blank");
+  win.document.write(\`
+    <html>
+      <head>
+        <title>In Hóa Đơn</title>
+        <style>
+          body, html { margin:0; padding:0; text-align:center; }
+          img { width: 58mm; max-width:100%; }
+        </style>
+      </head>
+      <body>
+        <img src="\${imgData}" />
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(()=>window.close(), 500);
+          }
+        </script>
+      </body>
+    </html>
+  \`);
+  win.document.close();
 }
 
 function xacNhanThu(){
@@ -262,7 +276,7 @@ function xacNhanThu(){
 function xuatLichSu(loai){
   const arr=loai==='in'?lichSuIn:lichSuThu;
   const txt=arr.map(i=>`(${i.thoiGian}) ${i.maKH}-${i.tenKH}: ${i.soTien}`).join('\\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download=`lich_su_${loai}.txt`;a.click();
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download=\`lich_su_\${loai}.txt\`;a.click();
 }
 
 function xuatLichSuExcel(){
