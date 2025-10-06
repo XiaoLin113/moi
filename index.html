@@ -253,6 +253,11 @@ function removeDiacritics(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
+<script>
+function removeDiacritics(str) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
 function inHoaDon(){
   const hoaDon = document.getElementById('hoaDon').cloneNode(true);
   hoaDon.innerHTML = removeDiacritics(hoaDon.innerHTML);
@@ -268,6 +273,7 @@ function inHoaDon(){
   printWindow.print();
   printWindow.close();
 }
+</script>
 
 function xacNhanThu(){
   const ma=document.getElementById('maKH').value,ten=document.getElementById('tenKH').value,so=Number(document.getElementById('soTien').value||0)+phiCoDinh;
