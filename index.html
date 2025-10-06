@@ -249,25 +249,25 @@ function capNhatLichSu(){
   document.getElementById('lichSuThu').value=lichSuThu.map(i=>`(${i.thoiGian}) ${i.maKH}-${i.tenKH}: ${formatVND(i.soTien)}`).join('\n');
 }
 
+<script>
 function removeDiacritics(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
 function inHoaDon(){
-  const hoaDon = document.getElementById('hoaDon').cloneNode(true);
-  hoaDon.innerHTML = removeDiacritics(hoaDon.innerHTML);
+  const hoaDon = document.getElementById('hoaDon');
+  const oldContent = hoaDon.innerHTML;
 
-  const printWindow = window.open('', '', 'width=600,height=400');
-  printWindow.document.write('<html><head><title>In Hóa đơn</title>');
-  printWindow.document.write('<style>@media print { body{margin:0;font-size:14px;font-family:Arial;} }</style>');
-  printWindow.document.write('</head><body>');
-  printWindow.document.write(hoaDon.outerHTML);
-  printWindow.document.write('</body></html>');
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
-  printWindow.close();
+  // Chuyển tạm sang không dấu
+  hoaDon.innerHTML = removeDiacritics(oldContent);
+
+  // In với CSS gốc
+  window.print();
+
+  // Khôi phục lại nội dung gốc (có dấu)
+  hoaDon.innerHTML = oldContent;
 }
+</script>
 
 function xacNhanThu(){
   const ma=document.getElementById('maKH').value,ten=document.getElementById('tenKH').value,so=Number(document.getElementById('soTien').value||0)+phiCoDinh;
