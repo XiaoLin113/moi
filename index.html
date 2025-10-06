@@ -237,30 +237,28 @@ async function inHoaDon(){
         ten=document.getElementById('tenKH').value,
         so=Number(document.getElementById('soTien').value||0)+phiCoDinh;
   lichSuIn.push({maKH:ma,tenKH:ten,soTien:so,thoiGian:new Date().toLocaleString()});
-  localStorage.setItem('lichSuIn',JSON.stringify(lichSuIn));capNhatLichSu();
+  localStorage.setItem('lichSuIn',JSON.stringify(lichSuIn));
+  capNhatLichSu();
 
-  // tạo iframe ẩn để in
-  let iframe = document.createElement("iframe");
-  iframe.style.display = "none";
-  document.body.appendChild(iframe);
+  // Hiện ảnh hóa đơn ra màn hình tạm thời để in
+  const printArea = document.createElement("div");
+  printArea.id = "printArea";
+  printArea.style.position = "fixed";
+  printArea.style.top = "0";
+  printArea.style.left = "0";
+  printArea.style.width = "100%";
+  printArea.style.height = "100%";
+  printArea.style.background = "#fff";
+  printArea.style.zIndex = "9999";
+  printArea.style.textAlign = "center";
+  printArea.innerHTML = `<img src="${imgData}" style="max-width:100%;height:auto;" />`;
+  document.body.appendChild(printArea);
 
-  iframe.onload = function(){
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-    setTimeout(()=>document.body.removeChild(iframe),1000);
-  };
+  // Gọi menu in mặc định
+  window.print();
 
-  const doc = iframe.contentWindow.document;
-  doc.open();
-  doc.write(`
-    <html>
-      <head><title>In hóa đơn</title>
-        <style>body{text-align:center;margin:0;}img{max-width:100%;}</style>
-      </head>
-      <body><img src="${imgData}" /></body>
-    </html>
-  `);
-  doc.close();
+  // Xóa ảnh in tạm sau khi in
+  setTimeout(()=>{ if(document.getElementById("printArea")) document.body.removeChild(printArea); },1000);
 }
 
 function xacNhanThu(){
