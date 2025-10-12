@@ -56,42 +56,59 @@
       gap: 10px;
       margin-top: 10px;
     }
-    .button-group button {
-      flex: 1; 
-      padding: 12px 8px; 
+    
+    /* BASE STYLE CHO TẤT CẢ CÁC NÚT: Bo góc, font chữ */
+    .button-group button, .full-width-button {
       border: none;
-      border-radius: 8px;
-      font-size: 14px; 
+      border-radius: 8px; /* Bo góc 8px */
       font-weight: bold;
       cursor: pointer;
       color: #fff;
+      box-sizing: border-box;
     }
-    /* Các nút chức năng */
-    .excel-button, .primary-button {
-      background-color: #007bff;
+
+    /* Style cho 3 nút Tìm/Quét/In */
+    .button-group button {
+      flex: 1; 
+      padding: 12px 8px; 
+      font-size: 14px; 
+    }
+    
+    /* Style mới cho nút Đẩy dữ liệu (Toàn chiều rộng) */
+    .full-width-button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px; 
+    }
+
+    /* Màu sắc */
+    .primary-button {
+      background-color: #007bff; /* Màu xanh dương */
     }
     .secondary-button {
       background-color: #6c757d;
     }
     #inButton {
-      background-color: #28a745;
+      background-color: #28a745; /* Màu xanh lá (giống In) */
     }
+    
     #fileInput {
       display: none;
     }
 
-    /* CSS HIỂN THỊ HÓA ĐƠN TRÊN MÀN HÌNH */
+    /* CSS HIỂN THỊ HÓA ĐƠN TRÊN MÀN HÌNH (CÓ KHUNG) */
     #hoaDon {
       width: 100%;
       min-height: 250px;
-      border: 2px solid #333; /* Khung cho hóa đơn hiển thị */
+      border: 2px solid #333; /* Khung hiển thị trên màn hình */
       padding: 15px;
       border-radius: 8px;
       background-color: #fafafa;
       white-space: pre-wrap;
-      font-family: Arial, sans-serif; /* Dùng Arial để đồng bộ với in nhiệt */
-      font-size: 14px; /* Giảm cỡ chữ để mô phỏng in nhiệt */
+      font-family: Arial, sans-serif; 
+      font-size: 14px;
       line-height: 1.5;
+      box-sizing: border-box;
     }
     #hoaDon p { margin: 0; }
     #reader {
@@ -100,57 +117,49 @@
       border-radius: 8px;
     }
 
-    /* CSS ĐẶC BIỆT CHO MÁY IN NHIỆT K57 */
+    /* CSS ĐẶC BIỆT CHO IN ẤN (FIX LỖI) */
     @media print {
-      body {
-        margin: 0;
-        padding: 0;
-        /* Buộc chỉ in một trang */
-        overflow: hidden; 
+      /* Ẩn tất cả các thành phần */
+      body * {
+        visibility: hidden;
       }
-      /* Ẩn tất cả các phần tử ngoại trừ hóa đơn */
-      body > :not(#print-area) {
-        display: none !important;
+      
+      /* Hiển thị khu vực in và mọi thứ bên trong nó */
+      #print-area, #print-area * {
+        visibility: visible;
       }
-
-      /* Khu vực in chính */
+      
+      /* Đặt khu vực in lên đầu trang và cố định kích thước K57 */
       #print-area {
-        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
         width: 57mm; /* Chiều rộng chuẩn cho K57 */
-        /* Giảm margin để tối đa hóa diện tích in */
         padding: 0;
         margin: 0;
         box-shadow: none;
-        border: none;
-        background-color: white;
+        border: none !important; 
       }
       
-      /* Cấu hình nội dung hóa đơn cho K57 */
+      /* Tối ưu hóa hóa đơn in */
       #hoaDon {
-        /* Bỏ border khi in */
-        border: none !important;
+        border: none !important; /* Bỏ khung khi in */
         padding: 5px; 
-        font-size: 8pt; /* Rất quan trọng: cỡ chữ nhỏ cho máy in nhiệt */
+        font-size: 8pt; /* Cỡ chữ nhỏ cho máy in nhiệt */
         font-family: Arial, sans-serif;
         line-height: 1.2;
         color: black;
-        /* Đảm bảo khung nội dung không bị tràn */
         width: 100%; 
         box-sizing: border-box;
+        margin: 0;
       }
       
-      /* Các thành phần con trong hóa đơn */
-      #hoaDon * {
-        font-size: inherit;
-        line-height: inherit;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-
-      /* Đảm bảo QR code hiển thị rõ */
+      /* Đảm bảo QR code in đúng kích thước */
       #maQR img {
         width: 40mm !important; 
         height: 40mm !important;
+        margin: 0 auto;
+        display: block;
       }
     }
   </style>
@@ -160,7 +169,7 @@
 <div class="container">
   
   <div class="card">
-    <button onclick="document.getElementById('fileInput').click()" class="excel-button">
+    <button onclick="document.getElementById('fileInput').click()" class="primary-button full-width-button">
       Đẩy dữ liệu Excel
     </button>
     <input type="file" id="fileInput" accept=".xlsx" onchange="docFileExcel(event)" />
@@ -212,7 +221,6 @@
 </div>
 
 <script>
-// Dữ liệu và hàm logic được giữ nguyên từ mã cũ, đã được tinh chỉnh lại cho phù hợp
 const bangGiaDien = [
   { sanLuong: 55, donGia: 1984 },
   { sanLuong: 52, donGia: 2050 },
@@ -266,7 +274,6 @@ function timKiemMaKH() {
 }
 
 function hienThiHoaDon(maKH, tenKH, soTien, sanLuong) {
-  // Đã xóa input "người thu" và "tiêu đề" nên fix cứng
   const nguoiThu = "-"; 
   const tieuDe = "HOA DON NHAN CHUYEN KHOAN HO TIEN DIEN"; 
   const phi = 2000;
@@ -276,7 +283,6 @@ function hienThiHoaDon(maKH, tenKH, soTien, sanLuong) {
   const gio = now.toTimeString().split(' ')[0].slice(0, 5);
   const thoiGian = `Ngay ${ngay}, Gio ${gio}`;
   
-  // Lưu ý: Dùng removeAccents() để loại bỏ dấu cho in nhiệt (giúp máy in không bị lỗi font)
   const noiDung = `
     <div style="text-align:center; font-weight:bold; margin-bottom:5px;">${removeAccents(tieuDe).toUpperCase()}</div>
     <div style="text-align:center; font-weight:bold; margin-bottom:10px;">THU TIEN DIEN</div>
@@ -297,7 +303,6 @@ function hienThiHoaDon(maKH, tenKH, soTien, sanLuong) {
   
   const barcodeContainer = document.getElementById("maQR");
   barcodeContainer.innerHTML = '';
-  // Giảm kích thước QR code để vừa khổ K57
   new QRCode(barcodeContainer, {
     text: maKH,
     width: 80, 
@@ -316,18 +321,15 @@ function inHoaDon() {
   const tong = soTien + 2000;
   const thoiGian = new Date().toLocaleString();
   
-  // Lưu lịch sử
   lichSuIn.push({ maKH, tenKH, soTien: tong, thoiGian });
   lichSuThu.push({ maKH, tenKH, soTien: tong, thoiGian });
   localStorage.setItem("lichSuIn", JSON.stringify(lichSuIn));
   localStorage.setItem("lichSuThu", JSON.stringify(lichSuThu));
   capNhatLichSu();
 
-  // Gọi hàm in
   setTimeout(() => { window.print(); }, 500);
 }
 
-// Các hàm khác (Lịch sử, Excel, Quét QR) được giữ nguyên và đảm bảo hoạt động
 function capNhatLichSu() {
   const thuText = lichSuThu.map(item => `(${item.thoiGian}) ${item.maKH} - ${item.tenKH}: ${formatVND(item.soTien)}`).join("\n");
   document.getElementById("lichSuThu").value = thuText;
