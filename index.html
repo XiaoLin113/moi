@@ -275,7 +275,7 @@ function timKiemMaKH() {
 
 function hienThiHoaDon(maKH, tenKH, soTien, sanLuong) {
   const nguoiThu = "-"; 
-  const tieuDe = "HOA DON NHAN CHUYEN KHOAN HO TIEN DIEN"; 
+  const tieuDe = "THU TIEN DIEN"; 
   const phi = 2000;
   const tong = Number(soTien) + phi;
   const now = new Date();
@@ -283,9 +283,9 @@ function hienThiHoaDon(maKH, tenKH, soTien, sanLuong) {
   const gio = now.toTimeString().split(' ')[0].slice(0, 5);
   const thoiGian = `Ngay ${ngay}, Gio ${gio}`;
   
+  // Thay đổi cấu trúc HTML để có bố cục in ấn như mẫu
   const noiDung = `
     <div style="text-align:center; font-weight:bold; margin-bottom:5px;">${removeAccents(tieuDe).toUpperCase()}</div>
-    <div style="text-align:center; font-weight:bold; margin-bottom:10px;">THU TIEN DIEN</div>
     
     <p>Ma KH: ${removeAccents(maKH)}</p>
     <p>Ten KH: ${removeAccents(tenKH)}</p>
