@@ -134,7 +134,7 @@
         position: absolute;
         left: 0;
         top: 0;
-        width: 57mm; /* Chiều rộng chuẩn cho K57 */
+        width: 58mm; /* Chiều rộng chuẩn cho K57 */
         padding: 0;
         margin: 0;
         box-shadow: none;
@@ -146,20 +146,29 @@
         border: none !important; /* Bỏ khung khi in */
         padding: 5px; 
         font-size: 8pt; /* Cỡ chữ nhỏ cho máy in nhiệt */
-        font-family: Arial, sans-serif;
-        line-height: 1.2;
+        font-family: "Times New Roman", Times, serif;
+        line-height: 1.1; /* GIẢM KHOẢNG CÁCH DÒNG */
         color: black;
         width: 100%; 
         box-sizing: border-box;
         margin: 0;
+        white-space: pre-wrap; /* Quan trọng để giữ định dạng xuống dòng từ <pre> */
       }
-      
-      /* Đảm bảo QR code in đúng kích thước */
+
+      /* Đảm bảo mã QR in đúng kích thước và căn giữa */
+      #maQR {
+        text-align: center; /* Căn giữa mã QR */
+        margin-top: 5px; 
+      }
       #maQR img {
         width: 40mm !important; 
         height: 40mm !important;
         margin: 0 auto;
         display: block;
+      }
+      /* Tăng độ đậm cho text quan trọng nếu cần */
+      #receipt-text {
+        font-weight: bold; 
       }
     }
   </style>
@@ -274,39 +283,44 @@ function timKiemMaKH() {
 }
 
 function hienThiHoaDon(maKH, tenKH, soTien, sanLuong) {
-  const nguoiThu = "-"; 
-  const tieuDe = "THU TIEN DIEN"; 
+  const nguoiThu = "-";
+  const tieuDe = "THU TIEN DIEN";
   const phi = 2000;
   const tong = Number(soTien) + phi;
   const now = new Date();
   const ngay = now.toLocaleDateString('vi-VN');
-  const gio = now.toTimeString().split(' ')[0].slice(0, 5);
-  const thoiGian = `Ngay ${ngay}, Gio ${gio}`;
-  
-  // Thay đổi cấu trúc HTML để có bố cục in ấn như mẫu
+  const gio = now.toTimeString().split(' ')[0].slice(0, 8);
+  const thoiGian = `Ngay ${ngay}  Gio ${gio}`;
+
+  // BỎ DẤU TẤT CẢ CHUỖI TRƯỚC KHI IN
+  const noiDungText = `
+${removeAccents(tieuDe)}
+Ma KH: ${removeAccents(maKH)}
+Ten KH: ${removeAccents(tenKH)}
+Uoc san luong: ${sanLuong} kWh
+Phi: ${formatVND(phi)}
+TONG: ${formatVND(tong)}
+Nguoi thu: ${removeAccents(nguoiThu)}
+
+            DA NHAN TIEN
+${removeAccents(thoiGian)}
+  `.trim();
+
   const noiDung = `
-    <div style="text-align:center; font-weight:bold; margin-bottom:5px;">${removeAccents(tieuDe).toUpperCase()}</div>
-    
-    <p>Ma KH: ${removeAccents(maKH)}</p>
-    <p>Ten KH: ${removeAccents(tenKH)}</p>
-    <p>Uoc san luong: ${sanLuong} kWh</p>
-    <p>Phi: ${formatVND(phi)}</p>
-    <p style="font-weight:bold;">TONG: ${formatVND(tong)}</p>
-    <p>Nguoi thu: ${removeAccents(nguoiThu)}</p>
-    
-    <div style="text-align:center; font-weight:bold; margin-top:10px;">DA NHAN TIEN</div>
-    <p style="text-align:center;">${thoiGian}</p>
-    
+    <pre id="receipt-text"
+         style="font-family: 'Times New Roman', Times, serif; font-size: 9pt; margin:0; line-height: 1.1; text-align: left;">
+${noiDungText}
+    </pre>
     <div id="maQR" style="text-align:center; margin-top:5px;"></div>
   `;
-  document.getElementById("hoaDon").innerHTML = noiDung.trim();
-  
+  document.getElementById("hoaDon").innerHTML = noiDung;
+
   const barcodeContainer = document.getElementById("maQR");
-  barcodeContainer.innerHTML = '';
+  barcodeContainer.innerHTML = "";
   new QRCode(barcodeContainer, {
     text: maKH,
-    width: 80, 
-    height: 80 
+    width: 80,
+    height: 80
   });
 }
 
