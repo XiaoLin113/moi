@@ -285,7 +285,6 @@ function timKiemMaKH() {
 function hienThiHoaDon(maKH, tenKH, soTien, sanLuong) {
   const nguoiThu = "Hoan Ngo";
   const tieuDe = "THU TIEN DIEN";
-  const phi = 2000;
   const tong = Number(soTien) + phi;
   const now = new Date();
   const ngay = now.toLocaleDateString('vi-VN');
@@ -297,7 +296,6 @@ function hienThiHoaDon(maKH, tenKH, soTien, sanLuong) {
 ${removeAccents(tieuDe)}
 Ma KH: ${removeAccents(maKH)}
 Ten KH: ${removeAccents(tenKH)}
-Phi: ${formatVND(phi)}
 TONG: ${formatVND(tong)}
 Nguoi thu: ${removeAccents(nguoiThu)}
 
